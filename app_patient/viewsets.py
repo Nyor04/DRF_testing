@@ -1,11 +1,16 @@
-from rest_framework.viewsets import ModelViewSet
-from .models import Patient
-from .serializers import PatientSerializer
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from .models import Patient, Insurance, MediacalRecord
+
+from .serializers import (
+    PatientSerializer,
+    InsuranceSerializer,
+    MediacalRecordSerializer,
+)
+
 
 class PatientViewSet(ModelViewSet):
     queryset = Patient.objects.all()
-    serializer_class =  PatientSerializer
-
+    serializer_class = PatientSerializer
 
     def list(self, request, *args, **kwargs):
         """Devuelve una lista de todos los pacientes."""
@@ -30,3 +35,33 @@ class PatientViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         """Elimina un paciente por su ID."""
         return super().destroy(request, *args, **kwargs)
+
+'''
+mas adelante quisiera que la informacion solicitada de los seguros sea exclusiva del usuario que esta haciendo la solicitud
+por ende modificare el metodo get_queryset, pasando self como argumento, de self puedo sacar el atributo request, por ende el user. 
+estos endpoints deben requerir que el usuario este autenticado.
+'''
+class InsuranceViewSet(ReadOnlyModelViewSet):
+    queryset = Insurance.objects.all() 
+    serializer_class = InsuranceSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Devuelve una lista de todos los seguros."""
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Devuelve un seguro específico por su ID."""
+        return super().retrieve(request, *args, **kwargs)
+
+
+class MediacalRecordViewSet(ReadOnlyModelViewSet):
+    queryset = MediacalRecord.objects.all()
+    serializer_class = MediacalRecordSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Devuelve una lista todos los records medicos"""
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Devuelve un el record medico de un paciente específico por su ID."""
+        return super().retrieve(request, *args, **kwargs)
