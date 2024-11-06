@@ -18,7 +18,7 @@ class Appointment(models.Model):
     notes = models.TextField()
     status = models.CharField(max_length=50)
 
-class MedicalNote(models.Model):
+class AppointmentNote(models.Model):
     appointment_note = models.ForeignKey(
         Appointment,
         related_name="appointment_notes",
