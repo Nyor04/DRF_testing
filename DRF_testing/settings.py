@@ -45,7 +45,17 @@ INSTALLED_APPS = [
     'app_patient',
     'app_doctor',
     'app_appointment',
+    'docs',
+    'drf_spectacular',
+   
 ]
+
+# SPECTACULAR_SETTINGS = {
+#     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+#     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+#     'REDOC_DIST': 'SIDECAR',
+#     # OTHER SETTINGS
+# }
 
 
 
@@ -110,13 +120,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 #rest_framework config dict.
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}
+# REST_FRAMEWORK = {
+#     # Use Django's standard `django.contrib.auth` permissions,
+#     # or allow read-only access for unauthenticated users.
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+#     ]
+# }
 
 
 
@@ -142,3 +152,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
