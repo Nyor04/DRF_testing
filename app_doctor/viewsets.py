@@ -1,4 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from ipdb import set_trace
 
 from .models import Doctor, Department, DoctorAvailability, MedicalNote
 
@@ -11,9 +15,26 @@ from .serializers import (
 
 
 class DoctorViewSet(ModelViewSet):
-    
+
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+
+    @action(["POST"], detail=True, url_path="set-on-vacation")
+    def set_on_vacation(self, request, pk):
+        doctor = self.get_object()
+        
+        doctor.is_on_vacation = True
+        doctor.save()
+        return Response({"message":f"vacation set ON to Dr. {doctor.first_name + ' ' + doctor.last_name}"})
+    
+
+    @action(["POST"], detail=True, url_path="set-off-vacation")
+    def set_off_vacation(self, request, pk):
+        doctor = self.get_object()
+     
+        doctor.is_on_vacation = False
+        doctor.save()
+        return Response({"message":f"vacation set OFF to Dr. {doctor.first_name + ' ' + doctor.last_name}"})
 
     def list(self, request, *args, **kwargs):
         """Devuelve una lista de todos los Doctores."""
