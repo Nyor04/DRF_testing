@@ -7,11 +7,13 @@ class Doctor(models.Model):
     last_name = models.CharField(max_length=50)
     qualifications = models.CharField(max_length=100)
     contact_number = models.CharField(max_length=15)
-    email = models.CharField(max_length=50)
+    email = models.EmailField(max_length=254)
     address = models.TextField()
     biography = models.TextField()
     is_on_vacation = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"Dr. {self.first_name} {self.last_name} - id: {self.id}"
 
 class Department(models.Model):
     doctor = models.ForeignKey(

@@ -1,10 +1,23 @@
 from rest_framework import serializers
 from .models import Doctor, Department,DoctorAvailability,MedicalNote
+from app_appointment.serializers import AppointmentSerializer
 
 class DoctorSerializer(serializers.ModelSerializer):
+    appointments = AppointmentSerializer(many= True, read_only=True)
     class Meta:
         model = Doctor
-        fields = '__all__'
+        fields = [
+            'id',
+            'first_name',
+            'last_name',
+            'qualifications',
+            'contact_number',
+            'email',
+            'address',
+            'biography',
+            'is_on_vacation',
+            'appointments'
+        ]
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,10 +1,16 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import status
 from ipdb import set_trace
 
 from .models import Doctor, Department, DoctorAvailability, MedicalNote
+from .permissions import IsDoctor
+
+from app_appointment.serializers import AppointmentSerializer
+
+from app_appointment.models import Appointment
 
 from .serializers import (
     DoctorSerializer,
@@ -18,6 +24,7 @@ class DoctorViewSet(ModelViewSet):
 
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly,IsDoctor]
 
     @action(["POST"], detail=True, url_path="set-on-vacation")
     def set_on_vacation(self, request, pk):
@@ -35,6 +42,34 @@ class DoctorViewSet(ModelViewSet):
         doctor.is_on_vacation = False
         doctor.save()
         return Response({"message":f"vacation set OFF to Dr. {doctor.first_name + ' ' + doctor.last_name}"})
+    ###tengo que implementar poder eliminar un appointment
+
+    @action(['POST','GET','DELETE'], detail=True, serializer_class=AppointmentSerializer, url_path="appointments(?:/(?P<appointment_id>[^/.]+))?")
+    def appointment(self, request, pk = None, appointment_id = None):
+        doctor = self.get_object()
+        
+        if request.method == 'POST':
+            data = request.data.copy()
+            data['doctor'] = doctor.id
+            serializer = AppointmentSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'GET':
+            if appointment_id == None:
+                appointments = Appointment.objects.filter(doctor=doctor)
+
+            if appointment_id != None:
+                appointments = Appointment.objects.filter(doctor=doctor,id=appointment_id)
+                
+            serializer = AppointmentSerializer(data=appointments, many = True)
+            serializer.is_valid()
+            return Response(serializer.data)
+        
+        if request.method == 'DELETE':
+            Appointment.objects.get(id=appointment_id).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request, *args, **kwargs):
         """Devuelve una lista de todos los Doctores."""

@@ -6,9 +6,13 @@ class Patient(models.Model):
     last_name = models.CharField(max_length=50)
     date_of_birth = models.DateField()
     contact_number = models.CharField(max_length=15)
-    email = models.CharField(max_length=50)
+    email = models.EmailField( max_length=254)
     address = models.TextField()
     medical_history = models.TextField()
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} - id: {self.id}"
+    
 
 class Insurance(models.Model):
     patient = models.ForeignKey(
