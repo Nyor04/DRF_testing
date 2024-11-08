@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
-
+from drf_spectacular.utils import extend_schema_view, extend_schema 
 from .models import Appointment, AppointmentNote
 
 from .serializers import (
@@ -8,7 +8,14 @@ from .serializers import (
         
 )
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['Appointment']),
+    retrieve=extend_schema(tags=["Appointment"]),
+    create=extend_schema(tags=["Admin - Appointment"]),
+    update=extend_schema(tags=["Admin - Appointment"]),
+    partial_update=extend_schema(tags=["Admin - Appointment"]),
+    destroy=extend_schema(tags=["Admin - Appointment"]),
+)
 class AppointmentViewSet(ModelViewSet):
     
     queryset = Appointment.objects.all()
@@ -40,7 +47,14 @@ class AppointmentViewSet(ModelViewSet):
 
 
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['AppointmentNotes']),
+    retrieve=extend_schema(tags=["AppointmentNotes"]),
+    create=extend_schema(tags=["Admin - AppointmentNotes"]),
+    update=extend_schema(tags=["Admin - AppointmentNotes"]),
+    partial_update=extend_schema(tags=["Admin - AppointmentNotes"]),
+    destroy=extend_schema(tags=["Admin - AppointmentNotes"]),
+)
 class AppointmentNoteViewSet(ModelViewSet):
     queryset = AppointmentNote.objects.all()
     serializer_class = AppointmentNoteSerializer

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
+    'django_extensions',
     'app_patient',
     'app_doctor',
     'app_appointment',
@@ -50,12 +51,6 @@ INSTALLED_APPS = [
    
 ]
 
-# SPECTACULAR_SETTINGS = {
-#     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
-#     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
-#     'REDOC_DIST': 'SIDECAR',
-#     # OTHER SETTINGS
-# }
 
 
 
@@ -157,4 +152,80 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
      ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Dr. Appointment API',
+    'DESCRIPTION': 'API para gestionar citas con doctores de un hospital X, creada para practicar con django Rest Framework',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'TAGS': [
+        {
+            'name': 'Patients',
+            'description': 'Endpoints for managing Patients in the system.',
+        },
+        {
+            'name': 'Admin - Patients',
+            'description': 'Administrative actions for Patients management.',
+        },
+        {
+            'name': 'Appointment',
+            'description': 'Endpoints for managing Appointments in the system.',
+        },
+        {
+            'name': 'Admin - Appointment',
+            'description': 'Administrative actions for Appointments management.',
+        },
+        {
+            'name': 'AppointmentNotes',
+            'description': 'Endpoints for managing Appointment Notes in the system.',
+        },
+        {
+            'name': 'Admin - AppointmentNotes',
+            'description': 'Administrative actions for Appointment Notes management.',
+        },
+        {
+            'name': 'Doctors',
+            'description': 'Endpoints for managing Doctors in the system.',
+        },
+        {
+            'name': 'Admin - Doctors',
+            'description': 'Administrative actions for Doctors management.',
+        },
+        {
+            'name': 'MedicalNotes',
+            'description': 'Endpoints for managing Medical Notes in the system.',
+        },
+        {
+            'name': 'Admin - MedicalNotes',
+            'description': 'Administrative actions for Medical Notes management.',
+        },
+        {
+            'name': 'Department',
+            'description': 'Endpoints for managing Departments in the system.',
+        },
+        {
+            'name': 'Admin - Department',
+            'description': 'Administrative actions for Departments management.',
+        },
+        {
+            'name': 'DoctorAvailability',
+            'description': 'Endpoints for managing Doctors Availabilities in the system.',
+        },
+        {
+            'name': 'Admin - DoctorAvailability',
+            'description': 'Administrative actions for Doctors Availabilities management.',
+        },
+        {
+            'name': 'Insurance',
+            'description': 'Endpoints for managing Insurance in the system.',
+        },
+        {
+            'name': 'MedicalRecords',
+            'description': 'Endpoints for managing Medica Records in the system.',
+        },
+        
+        
+        
+    ],
 }

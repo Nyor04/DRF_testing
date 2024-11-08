@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from .models import Patient, Insurance, MediacalRecord
 
 from .serializers import (
@@ -9,8 +10,17 @@ from .serializers import (
     MediacalRecordSerializer,
 )
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['Patients']),
+    retrieve=extend_schema(tags=["Patients"]),
+    create=extend_schema(tags=["Admin - Patients"]),
+    update=extend_schema(tags=["Admin - Patients"]),
+    partial_update=extend_schema(tags=["Admin - Patients"]),
+    destroy=extend_schema(tags=["Admin - Patients"]),
+)
 class PatientViewSet(ModelViewSet):
+
+    
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
@@ -50,7 +60,10 @@ por ende modificare el metodo get_queryset, pasando self como argumento, de self
 estos endpoints deben requerir que el usuario este autenticado.
 """
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['Insurance']),
+    retrieve=extend_schema(tags=["Insurance"]),
+)
 class InsuranceViewSet(ReadOnlyModelViewSet):
     queryset = Insurance.objects.all()
     serializer_class = InsuranceSerializer
@@ -64,6 +77,10 @@ class InsuranceViewSet(ReadOnlyModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['MedicalRecords']),
+    retrieve=extend_schema(tags=["MedicalRecords"]),
+)
 class MediacalRecordViewSet(ReadOnlyModelViewSet):
     queryset = MediacalRecord.objects.all()
     serializer_class = MediacalRecordSerializer

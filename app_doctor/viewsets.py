@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
 from ipdb import set_trace
 
+from drf_spectacular.utils import extend_schema_view,extend_schema
+
 from .models import Doctor, Department, DoctorAvailability, MedicalNote
 from .permissions import IsDoctor
 
@@ -19,35 +21,60 @@ from .serializers import (
     MedicalNoteSerializer,
 )
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['Doctors']),
+    retrieve=extend_schema(tags=["Doctors"]),
+    create=extend_schema(tags=["Admin - Doctors"]),
+    update=extend_schema(tags=["Admin - Doctors"]),
+    partial_update=extend_schema(tags=["Admin - Doctors"]),
+    destroy=extend_schema(tags=["Admin - Doctors"]),
+)
 class DoctorViewSet(ModelViewSet):
-
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly,IsDoctor]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-    @action(["POST"], detail=True, url_path="set-on-vacation")
-    def set_on_vacation(self, request, pk):
+    @action(methods=["post"], detail=True, url_path="set-on-vacation")
+    @extend_schema(
+        tags=["Admin - Doctors"],
+        summary="Set: bool(True) to the  is_on_vacation attribute of a Doctor Object",
+    )
+    def set_on_vacation(self, request, pk=None):
         doctor = self.get_object()
-        
         doctor.is_on_vacation = True
         doctor.save()
-        return Response({"message":f"vacation set ON to Dr. {doctor.first_name + ' ' + doctor.last_name}"})
-    
+        return Response({"message": f"Vacation set ON to Dr. {doctor.first_name} {doctor.last_name}"})
 
-    @action(["POST"], detail=True, url_path="set-off-vacation")
-    def set_off_vacation(self, request, pk):
+    @action(methods=["post"], detail=True, url_path="set-off-vacation")
+    @extend_schema(
+        tags=["Admin - Doctors"],
+        summary="Set: bool(False) to the is_on_vacation attribute of a Doctor Object",
+    )
+    def set_off_vacation(self, request, pk=None):
         doctor = self.get_object()
-     
         doctor.is_on_vacation = False
         doctor.save()
-        return Response({"message":f"vacation set OFF to Dr. {doctor.first_name + ' ' + doctor.last_name}"})
-    ###tengo que implementar poder eliminar un appointment
+        return Response({"message": f"Vacation set OFF to Dr. {doctor.first_name} {doctor.last_name}"})
 
-    @action(['POST','GET','DELETE'], detail=True, serializer_class=AppointmentSerializer, url_path="appointments(?:/(?P<appointment_id>[^/.]+))?")
-    def appointment(self, request, pk = None, appointment_id = None):
+    @action(
+        methods=["post", "get", "delete"], 
+        detail=True, 
+        url_path="appointments/(?P<appointment_id>[^/.]+)?",
+        serializer_class=AppointmentSerializer
+    )
+    @extend_schema(
+        tags=["Admin - Doctors"],
+        summary="Interact with Doctor's Appointments",
+        description=(
+            "GET: Retrieve the list of appointments for the doctor. "
+            "POST: Create an appointment for the doctor. "
+            "DELETE: Delete a specific appointment using appointment ID."
+        ),
+    )
+    def appointment(self, request, pk=None, appointment_id=None):
         doctor = self.get_object()
-        
+
+        # POST - Crear una nueva cita
         if request.method == 'POST':
             data = request.data.copy()
             data['doctor'] = doctor.id
@@ -56,20 +83,32 @@ class DoctorViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        # GET - Obtener citas del doctor
         if request.method == 'GET':
-            if appointment_id == None:
+            if appointment_id:
+                # Obtener una cita específica
+                try:
+                    appointment = Appointment.objects.get(id=appointment_id, doctor=doctor)
+                    serializer = AppointmentSerializer(appointment)
+                    return Response(serializer.data)
+                except Appointment.DoesNotExist:
+                    return Response({"error": "Appointment not found."}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                # Obtener todas las citas del doctor
                 appointments = Appointment.objects.filter(doctor=doctor)
+                serializer = AppointmentSerializer(appointments, many=True)
+                return Response(serializer.data)
 
-            if appointment_id != None:
-                appointments = Appointment.objects.filter(doctor=doctor,id=appointment_id)
-                
-            serializer = AppointmentSerializer(data=appointments, many = True)
-            serializer.is_valid()
-            return Response(serializer.data)
-        
+        # DELETE - Eliminar una cita específica
         if request.method == 'DELETE':
-            Appointment.objects.get(id=appointment_id).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if not appointment_id:
+                return Response({"error": "Appointment ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                appointment = Appointment.objects.get(id=appointment_id, doctor=doctor)
+                appointment.delete()
+                return Response({"message": "Appointment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+            except Appointment.DoesNotExist:
+                return Response({"error": "Appointment not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request, *args, **kwargs):
         """Devuelve una lista de todos los Doctores."""
@@ -95,7 +134,14 @@ class DoctorViewSet(ModelViewSet):
         """Elimina un Doctor por su ID."""
         return super().destroy(request, *args, **kwargs)
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['Department']),
+    retrieve=extend_schema(tags=["Department"]),
+    create=extend_schema(tags=["Admin - Department"]),
+    update=extend_schema(tags=["Admin - Department"]),
+    partial_update=extend_schema(tags=["Admin - Department"]),
+    destroy=extend_schema(tags=["Admin - Department"]),
+)
 class DepartmentViewSet(ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
@@ -124,7 +170,14 @@ class DepartmentViewSet(ModelViewSet):
         """Elimina un Department por su ID."""
         return super().destroy(request, *args, **kwargs)
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['DoctorAvailability']),
+    retrieve=extend_schema(tags=["DoctorAvailability"]),
+    create=extend_schema(tags=["Admin - DoctorAvailability"]),
+    update=extend_schema(tags=["Admin - DoctorAvailability"]),
+    partial_update=extend_schema(tags=["Admin - DoctorAvailability"]),
+    destroy=extend_schema(tags=["Admin - DoctorAvailability"]),
+)
 class DoctorAvailabilityViewSet(ModelViewSet):
     queryset = DoctorAvailability.objects.all()
     serializer_class = DoctorAvailabilitySerializer
@@ -153,7 +206,14 @@ class DoctorAvailabilityViewSet(ModelViewSet):
         """Elimina un DoctorAvailability por su ID."""
         return super().destroy(request, *args, **kwargs)
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['MedicalNotes']),
+    retrieve=extend_schema(tags=["MedicalNotes"]),
+    create=extend_schema(tags=["Admin - MedicalNotes"]),
+    update=extend_schema(tags=["Admin - MedicalNotes"]),
+    partial_update=extend_schema(tags=["Admin - MedicalNotes"]),
+    destroy=extend_schema(tags=["Admin - MedicalNotes"]),
+)
 class MedicalNoteViewSet(ModelViewSet):
     queryset = MedicalNote.objects.all()
     serializer_class = MedicalNoteSerializer
